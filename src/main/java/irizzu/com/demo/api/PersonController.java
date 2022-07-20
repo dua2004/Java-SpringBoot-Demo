@@ -1,9 +1,9 @@
 package irizzu.com.demo.api;
 
 import irizzu.com.demo.model.Person;
-import irizzu.com.demo.model.ResponseObject;
 import irizzu.com.demo.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -26,12 +26,16 @@ public class PersonController {
     }
 
     @GetMapping
-    public ResponseObject getAllPerson(){
-        return personService.getAllPerson();
+    public ResponseEntity<List<Person>> getAllPerson(){
+        return ResponseEntity.ok(personService.getAllPerson());
     }
 
     @GetMapping(path = "/{id}")
-    public ResponseObject getPersonById(@PathVariable("id") UUID id){
-        return personService.findPersonById(id);
+    public ResponseEntity<Person> getPersonById(@PathVariable("id") UUID id){
+        return ResponseEntity.ok(personService.findPersonById(id));
+    }
+    @GetMapping(path = "/getPersonByName/{name}")
+    public ResponseEntity<Person> getPersonByName(@PathVariable("name") String name){
+        return ResponseEntity.ok(personService.findPersonByName(name));
     }
 }
