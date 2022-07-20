@@ -1,5 +1,6 @@
 package irizzu.com.demo.dao;
 
+import com.sun.tools.jconsole.JConsoleContext;
 import irizzu.com.demo.model.Person;
 import org.springframework.stereotype.Repository;
 
@@ -24,7 +25,7 @@ public class FakePersonDataAccessService implements PersonDAO {
 	}
 
     @Override
-    public Optional<Person> findPersonByname(String name) {
+    public Optional<Person> findPersonByName(String name) {
         return DB.stream().filter(person -> person.getName().contains(name)).findFirst();
     }
 
@@ -34,12 +35,27 @@ public class FakePersonDataAccessService implements PersonDAO {
     }
 
     @Override
-    public int deletePersonById(UUID id) {
-        return 0;
+    public boolean deletePersonById(UUID id) {
+        var personToDelete = DB.stream().filter(person -> person.getId().equals(id)).findFirst();
+        if(personToDelete.isPresent()) {
+            return DB.remove(personToDelete);
+        }
+        else {
+            return false;
+        }
     }
 
     @Override
-    public int updatePersonById(UUID id, Person person) {
-        return 0;
+    public boolean updatePersonById(UUID id, Person person) {
+        return DB.stream().filter(x -> x.getId().equals(id)).findFirst()
+                .map(p->{
+                    int depersonalisation = DB.indexOf(person);
+                    if(depersonalisation >= 0){
+                        DB.set(depersonalisation,person);
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }).orElse(false);
     }
 }
