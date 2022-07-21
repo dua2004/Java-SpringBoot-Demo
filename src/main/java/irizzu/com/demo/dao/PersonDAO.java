@@ -8,10 +8,10 @@ import java.util.UUID;
 public interface PersonDAO {
     int insertPerson(UUID id, Person person);
     List<Person> getAllPerson();
-    Optional<Person> findPersonByname(String name);
+    List<Person> findPersonByName(String name);
     Optional<Person> findPersonById(UUID id);
-    int deletePersonById(UUID id);
-    int updatePersonById(UUID id,Person person);
+    boolean deletePersonById(UUID id);
+    boolean updatePersonById(UUID id,Person person);
     default int insertPerson(Person person){
         UUID id = UUID.randomUUID();
         return insertPerson(id,person);

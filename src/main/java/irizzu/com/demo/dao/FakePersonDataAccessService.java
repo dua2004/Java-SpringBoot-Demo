@@ -3,10 +3,8 @@ package irizzu.com.demo.dao;
 import irizzu.com.demo.model.Person;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository("fakeDao")
 public class FakePersonDataAccessService implements PersonDAO {
@@ -24,8 +22,8 @@ public class FakePersonDataAccessService implements PersonDAO {
 	}
 
     @Override
-    public Optional<Person> findPersonByname(String name) {
-        return DB.stream().filter(person -> person.getName().contains(name)).findFirst();
+    public List<Person> findPersonByName(String name) {
+        return DB.stream().filter(x->x.getName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
     }
 
     @Override
@@ -34,12 +32,27 @@ public class FakePersonDataAccessService implements PersonDAO {
     }
 
     @Override
-    public int deletePersonById(UUID id) {
-        return 0;
+    public boolean deletePersonById(UUID id) {
+        Optional<Person> person = DB.stream().filter(x -> x.getId().equals(id)).findFirst();
+        if(person.isEmpty()){
+            return false;
+        }else{
+            return DB.remove(person.get());
+        }
     }
 
     @Override
-    public int updatePersonById(UUID id, Person person) {
-        return 0;
+    public boolean updatePersonById(UUID id, Person update) {
+        Optional<Person> personObjectToDelete= DB.stream().filter(x -> x.getId().equals(id)).findFirst();
+        return personObjectToDelete.map(p->{
+            int indexPersonUpdate = DB.indexOf(p);
+            if(indexPersonUpdate >= 0 ){
+                DB.set(indexPersonUpdate,new Person(id,update.getName()));
+                return true;
+            }else{
+                return false;
+            }
+
+        }).orElse(false);
     }
 }
