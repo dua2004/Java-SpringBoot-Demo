@@ -8,7 +8,7 @@ import java.util.UUID;
 public interface PersonDAO {
     int insertPerson(UUID id, Person person);
     List<Person> getAllPerson();
-    Optional<Person> findPersonByName(String name);
+    List<Person> findPersonByName(String name);
     Optional<Person> findPersonById(UUID id);
     boolean deletePersonById(UUID id);
     boolean updatePersonById(UUID id,Person person);

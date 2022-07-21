@@ -1,13 +1,10 @@
 package irizzu.com.demo.dao;
 
-import com.sun.tools.jconsole.JConsoleContext;
 import irizzu.com.demo.model.Person;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository("fakeDao")
 public class FakePersonDataAccessService implements PersonDAO {
@@ -25,8 +22,8 @@ public class FakePersonDataAccessService implements PersonDAO {
 	}
 
     @Override
-    public Optional<Person> findPersonByName(String name) {
-        return DB.stream().filter(person -> person.getName().contains(name)).findFirst();
+    public List<Person> findPersonByName(String name) {
+        return DB.stream().filter(x->x.getName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
     }
 
     @Override
@@ -36,26 +33,26 @@ public class FakePersonDataAccessService implements PersonDAO {
 
     @Override
     public boolean deletePersonById(UUID id) {
-        var personToDelete = DB.stream().filter(person -> person.getId().equals(id)).findFirst();
-        if(personToDelete.isPresent()) {
-            return DB.remove(personToDelete);
-        }
-        else {
+        Optional<Person> person = DB.stream().filter(x -> x.getId().equals(id)).findFirst();
+        if(person.isEmpty()){
             return false;
+        }else{
+            return DB.remove(person.get());
         }
     }
 
     @Override
-    public boolean updatePersonById(UUID id, Person person) {
-        return DB.stream().filter(x -> x.getId().equals(id)).findFirst()
-                .map(p->{
-                    int depersonalisation = DB.indexOf(person);
-                    if(depersonalisation >= 0){
-                        DB.set(depersonalisation,person);
-                        return true;
-                    }else{
-                        return false;
-                    }
-                }).orElse(false);
+    public boolean updatePersonById(UUID id, Person update) {
+        Optional<Person> personObjectToDelete= DB.stream().filter(x -> x.getId().equals(id)).findFirst();
+        return personObjectToDelete.map(p->{
+            int indexPersonUpdate = DB.indexOf(p);
+            if(indexPersonUpdate >= 0 ){
+                DB.set(indexPersonUpdate,new Person(id,update.getName()));
+                return true;
+            }else{
+                return false;
+            }
+
+        }).orElse(false);
     }
 }
