@@ -1,14 +1,21 @@
 version: '3.8'
+
 services:
-  dev-db:
+  postgres:
     image: postgres:13
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=password@123
+      - APP_DB_USER=personapp
+      - APP_DB_PASS=personapp
+      - APP_DB_NAME=personapp
+    volumes:
+      - ./db/migration:/docker-entrypoint-initdb.d/
     ports:
       - 5434:5432
-    environment:
-      POSTGRES_USER: appuser
-      POSTGRES_PASSWORD: appuser123
-      POSTGRES_DB: personapp
-    networks:
-      - freecodecamp
-networks:
-  freecodecamp:

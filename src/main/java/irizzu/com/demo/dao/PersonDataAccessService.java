@@ -2,13 +2,13 @@ package irizzu.com.demo.dao;
 
 import irizzu.com.demo.model.Person;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Repository("postgres")
 public class PersonDataAccessService implements PersonDAO{
@@ -21,7 +21,9 @@ public class PersonDataAccessService implements PersonDAO{
     }
     @Override
     public int insertPerson(UUID id, Person person) {
-        return 0;
+
+        return jdbcTemplate.update("INSERT INTO PERSON (id, name) VALUES(?,?)",
+                new Object[] { UUID.randomUUID(), person.getName().replace("'","") });
     }
 
     @Override
@@ -36,12 +38,22 @@ public class PersonDataAccessService implements PersonDAO{
 
     @Override
     public List<Person> findPersonByName(String name) {
-        return null;
+        return jdbcTemplate.query("SELECT id, name FROM person WHERE name like '%"+name.replace("'","''")+"%'",(resultSet,i)->{
+            return new Person(
+                    UUID.fromString(resultSet.getString("id")),
+                    resultSet.getString("name")
+            );
+        });
     }
 
     @Override
     public Optional<Person> findPersonById(UUID id) {
-        return Optional.empty();
+        return jdbcTemplate.query("SELECT id, name FROM person WHERE id = '"+id+"';",(resultSet,i)->{
+            return new Person(
+                    UUID.fromString(resultSet.getString("id")),
+                    resultSet.getString("name")
+            );
+        }).stream().findFirst();
     }
 
     @Override
