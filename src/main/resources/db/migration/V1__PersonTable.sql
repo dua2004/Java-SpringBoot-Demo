@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS person (id UUID not null primary key ,name  varchar(1000) not null);
